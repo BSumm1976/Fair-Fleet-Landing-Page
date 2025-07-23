@@ -130,7 +130,10 @@
                 Be among the first to experience Fair Fleet. Sign up below to get early access, exclusive updates, and a chance to shape the future of local delivery.
             </p>
 
-            <form id="interestForm" action="https://formspree.io/f/" method="POST" clahttps://formspree.io/f/myzpejobss="bg-white p-8 rounded-xl shadow-lg-custom space-y-6">
+            <!-- IMPORTANT: YOU MUST REPLACE "YOUR_FORMSPREE_ENDPOINT_HERE" BELOW -->
+            <!-- Go to https://formspree.io/forms, click your form, and copy the exact URL it gives you. -->
+            <!-- It will look like https://formspree.io/f/mknvwpqk (a unique ID at the end). -->
+            <form id="interestForm" action="https://formspree.io/f/myzpejob" method="POST" class="bg-white p-8 rounded-xl shadow-lg-custom space-y-6">
                 <div>
                     <label for="name" class="block text-left text-gray-700 text-sm font-bold mb-2">Your Name:</label>
                     <input type="text" id="name" name="name" placeholder="John Doe" required
@@ -174,109 +177,25 @@
         </div>
     </footer>
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-        // Global variables provided by the Canvas environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        // Authenticate anonymously or with custom token
-        async function authenticateFirebase() {
-            try {
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                    console.log("Firebase authenticated with custom token.");
-                } else {
-                    await signInAnonymously(auth);
-                    console.log("Firebase authenticated anonymously.");
-                }
-            } catch (error) {
-                console.error("Firebase authentication failed:", error);
-                displayMessage("Failed to initialize Firebase authentication. Please try again later.", 'error');
-            }
-        }
-
-        // DOM elements
+    <!-- Simple JavaScript for form submission feedback -->
+    <script>
         const interestForm = document.getElementById('interestForm');
         const submitButton = document.getElementById('submitButton');
         const buttonText = document.getElementById('buttonText');
         const loadingSpinner = document.getElementById('loadingSpinner');
         const formMessage = document.getElementById('formMessage');
 
-        // Function to display messages (success/error)
-        function displayMessage(message, type = 'info') {
-            formMessage.textContent = message;
-            if (type === 'success') {
-                formMessage.className = 'mt-4 text-center font-medium text-green-700';
-            } else if (type === 'error') {
-                formMessage.className = 'mt-4 text-center font-medium text-red-700';
-            } else {
-                formMessage.className = 'mt-4 text-center font-medium text-gray-700';
-            }
-        }
-
-        // Handle form submission
-        interestForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Prevent default form submission
-
-            // Disable button and show loading spinner
+        interestForm.addEventListener('submit', () => {
             submitButton.disabled = true;
             buttonText.textContent = 'Submitting...';
             loadingSpinner.classList.remove('hidden');
             formMessage.textContent = ''; // Clear previous messages
-
-            const name = document.getElementById('name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const role = document.getElementById('role').value;
-
-            // Basic validation
-            if (!name || !email || !role) {
-                displayMessage('Please fill in all required fields.', 'error');
-                submitButton.disabled = false;
-                buttonText.textContent = 'Sign Me Up!';
-                loadingSpinner.classList.add('hidden');
-                return;
-            }
-
-            try {
-                // Ensure Firebase is authenticated before writing
-                if (!auth.currentUser) {
-                    await authenticateFirebase(); // Re-authenticate if somehow lost
-                }
-
-                const interestedUsersCollection = collection(db, `artifacts/${appId}/public/data/interested_users`);
-                await addDoc(interestedUsersCollection, {
-                    name: name,
-                    email: email,
-                    roleOfInterest: role,
-                    timestamp: serverTimestamp()
-                });
-
-                displayMessage('Thank you for your interest! We will keep you updated.', 'success');
-                interestForm.reset(); // Clear the form
-            } catch (error) {
-                console.error("Error submitting interest form:", error);
-                displayMessage(`Failed to submit your interest: ${error.message}. Please try again.`, 'error');
-            } finally {
-                // Re-enable button and hide loading spinner
-                submitButton.disabled = false;
-                buttonText.textContent = 'Sign Me Up!';
-                loadingSpinner.classList.add('hidden');
-            }
         });
 
-        // Authenticate Firebase when the page loads
-        authenticateFirebase();
+        // Formspree handles the actual submission and redirects to a success page.
+        // If you wanted to handle success/error messages without redirecting,
+        // you'd use fetch API and Formspree's AJAX endpoint.
+        // For this simple landing page, the redirect is fine.
     </script>
 </body>
 </html>
